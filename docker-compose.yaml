@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+  mongodb:
+    image: mongo
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  mongo-seed:
+    image: mongo
+    volumes:
+      - ./dump:/dump
+    depends_on:
+      - mongodb
+    entrypoint: ["sh", "-c", "sleep 5 && mongorestore --host mongodb --port 27017 /dump"]
+
+  oaipmh:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      CONNECTOR: mongodb
+      DB_HOST: mongodb
+      DB_PORT: 27017
+      DB_USER:
+      DB_PASS:
+      DATABASE: dacat-next
+      COLLECTION: PublishedData
+      COLLECTION_ID: doi
+      BASE_URL: http://localhost
+      LOG_LEVEL: debug
+      HOST_CONFIGURATION: production/host_config.json
+    depends_on:
+      - mongodb
+      - mongo-seed
+
+volumes:
+  mongodb_data:

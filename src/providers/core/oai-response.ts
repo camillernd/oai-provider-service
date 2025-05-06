@@ -60,12 +60,25 @@ const responseTemplate = {
  * @param responseContent
  * @returns {string}
  */
-function generateResponse(verb: string, url: string, responseContent: any): string {
+/* function generateResponse(verb: string, url: string, responseContent: any): string {
     const newResponse = JSON.parse(JSON.stringify(responseTemplate));
     newResponse['OAI-PMH'].push({request: [{_attr: verb}, url]});
     newResponse['OAI-PMH'].push(responseContent);
     return xml(newResponse, {declaration: true});
-}
+} */
+    function generateResponse(verb: string, url: string, responseContent: any): string {
+        const newResponse = JSON.parse(JSON.stringify(responseTemplate));
+        newResponse['OAI-PMH'].push({request: [{_attr: verb}, url]});
+        newResponse['OAI-PMH'].push(responseContent);
+    
+        let rawXml = xml(newResponse, {declaration: true});
+        // Ajout manuel de la ligne stylesheet après la déclaration XML
+        rawXml = rawXml.replace(
+            '<?xml version="1.0" encoding="UTF-8"?>',
+            '<?xml version="1.0" encoding="UTF-8"?>\n<?xml-stylesheet type="text/xsl" href="/scicat/oai/style.xsl"?>'
+        );
+        return rawXml;
+    }
 
 /**
  * Generates an OAI exception in xml.
@@ -73,10 +86,9 @@ function generateResponse(verb: string, url: string, responseContent: any): stri
  * @param {EXCEPTION_CODES} code
  * @returns {string | NodeJS.ReadableStream}
  */
+/* 
 function generateException(exception: ExceptionParams, code: EXCEPTION_CODES) {
-    /**
-     * Validate the argument types.
-     */
+
     if (code === undefined) {
         throw new Error(`Function arguments are missing:  code: ${code}`);
     }
@@ -129,6 +141,58 @@ function generateException(exception: ExceptionParams, code: EXCEPTION_CODES) {
     newException['OAI-PMH'].push({error: [{_attr: {code}}, Exceptions.getExceptionMessage(code)]});
 
     return xml(newException, {declaration: true});
-}
+} */
+    function generateException(exception: ExceptionParams, code: EXCEPTION_CODES) {
+        if (code === undefined) {
+            throw new Error(`Function arguments are missing:  code: ${code}`);
+        }
+        if (Exceptions.getExceptionMessage(code) === Exceptions.UNKNOWN_CODE) {
+            throw new Error(`Unknown exception type: ${code}`);
+        }
+        const newException = JSON.parse(JSON.stringify(responseTemplate));
+    
+        if (exception.verb && exception.identifier && exception.metadataPrefix) {
+            newException['OAI-PMH'].push({
+                request: [
+                    {
+                        _attr: {
+                            verb: exception.verb,
+                            identifier: exception.identifier,
+                            metadataPrefix: exception.metadataPrefix
+                        }
+                    },
+                    exception.baseUrl
+                ]
+            });
+        } else if (exception.verb && exception.identifier) {
+            newException['OAI-PMH'].push({
+                request: [
+                    {
+                        _attr: {verb: exception.verb, identifier: exception.identifier}
+                    },
+                    exception.baseUrl
+                ]
+            });
+        } else if (exception.verb) {
+            newException['OAI-PMH'].push({
+                request: [
+                    {_attr: {verb: exception.verb}},
+                    exception.baseUrl
+                ]
+            });
+        } else {
+            newException['OAI-PMH'].push({request: exception.baseUrl});
+        }
+    
+        newException['OAI-PMH'].push({error: [{_attr: {code}}, Exceptions.getExceptionMessage(code)]});
+    
+        let rawXml = xml(newException, {declaration: true});
+        rawXml = rawXml.replace(
+            '<?xml version="1.0" encoding="UTF-8"?>',
+            '<?xml version="1.0" encoding="UTF-8"?>\n<?xml-stylesheet type="text/xsl" href="/scicat/oai/style.xsl"?>'
+        );
+        return rawXml;
+    }
+    
 
 export {generateException, generateResponse};

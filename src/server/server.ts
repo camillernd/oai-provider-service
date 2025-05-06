@@ -30,10 +30,13 @@ import http = require("http");
 import logger from "./logger";
 import { getHostConfiguration, hasHostConfigurationFile } from "./host-config";
 import { CorsOptions } from "cors";
+import path = require("path");
 var cors = require('cors')
 
 
 const app = express();
+
+app.use('/scicat/oai', express.static(path.join(__dirname, '../../public/scicat/oai')));
 
 
 export default class ExpressServer {

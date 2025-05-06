@@ -13,7 +13,7 @@
     "distclean": "gulp dist-clean && gulp build && gulp copy-production",
     "start": "cd dist && NODE_ENV=production node index",
     "compile": "gulp dist-clean && gulp build && gulp copy-production",
-    "dev": "gulp build && gulp copy && cd dist && node index | pino -o 'short'",
+    "dev": "gulp build && gulp copy && cd dist && node index | pino-pretty -t",
     "test": "node build.js && mocha --exit"
   },
   "dependencies": {
@@ -29,6 +29,7 @@
     "mongodb": "^6.7.0",
     "node": "^20.14.0",
     "pino": "^9.1.0",
+    "pino-pretty": "^13.0.0",
     "tsx": "^4.16.2",
     "xml": "^1.0.1",
     "xmldom": "^0.6.0"
@@ -45,6 +46,6 @@
     "source-map-support": "^0.5.21",
     "supertest": "^7.0.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.5.3"
+    "typescript": "^5.8.3"
   }
 }
