@@ -37,7 +37,7 @@ var cors = require('cors')
 const app = express();
 
 app.use('/scicat/oai', express.static(path.join(__dirname, '../../public/scicat/oai')));
-
+app.use('/scicat/home', express.static(path.join(__dirname, '../../public/scicat/home')));
 
 export default class ExpressServer {
   constructor() {

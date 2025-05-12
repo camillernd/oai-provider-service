@@ -1,21 +1,30 @@
+// Importe le logger du serveur pour afficher des messages de debug
 import logger from "../../../server/logger";
+
+// Importe l’interface que doit implémenter cette classe pour être un mapper OAI-DC
 import { ProviderDCMapper } from "../../core/core-oai-provider";
 
+// Définit une classe ScicatDcMapper qui sert à transformer les données Mongo en réponses OAI-PMH
 export class ScicatDcMapper implements ProviderDCMapper {
+  
   /**
-   * The Universal Coordinated Time (UTC) date needs to be modifed
-   * to match the local timezone.
-   * @param record the raw data returned by the mongo dao query
-   * @returns {string}
+   * Convertit une date UTC pour l’ajuster au fuseau horaire local (timezone offset).
+   * @param record - enregistrement Mongo brut
+   * @returns {string} - date ISO corrigée, sans millisecondes
    */
   private setTimeZoneOffset(record: any): string {
-    const date = new Date(record.updatedAt);
+    const date = new Date(record.updatedAt); // récupère la date mise à jour
     const timeZoneCorrection = new Date(
-      date.getTime() + date.getTimezoneOffset() * -60000
+      date.getTime() + date.getTimezoneOffset() * -60000 // applique l’offset en ms
     );
-    return timeZoneCorrection.toISOString().split(".")[0] + "Z";
+    return timeZoneCorrection.toISOString().split(".")[0] + "Z"; // retourne date ISO sans ms
   }
 
+  /**
+   * Renvoie un message de droits selon si le document est restreint ou non.
+   * @param restricted - boolean indiquant les droits
+   * @returns {string} - message texte
+   */
   private getRightsMessage(restricted: boolean): string {
     if (restricted) {
       return "Restricted to University users.";
@@ -23,20 +32,24 @@ export class ScicatDcMapper implements ProviderDCMapper {
     return "Available to the public.";
   }
 
+  /**
+   * Crée un bloc complet d’un enregistrement OAI structuré en DataCite.
+   * @param record - l’enregistrement Mongo brut
+   * @returns {any} - objet formaté pour être inséré dans le flux XML
+   */
   private createItemRecord(record: any): any {
-    //const updatedAt: string = this.setTimeZoneOffset(record);
     let item = {
       record: [
         {
           header: [
             {
               identifier: [
-                { _attr: { identifierType: "doi" } },
-                record._id.toString()
+                { _attr: { identifierType: "doi" } }, // type DOI
+                record._id.toString() // identifiant du document
               ]
             },
-            { setSpec: "openaire_data" },
-            { datestamp: "2020-01-01" }
+            { setSpec: "openaire_data" }, // set exposé, ici fixe
+            { datestamp: "2020-01-01" } // date fixe codée en dur
           ]
         },
         {
@@ -55,16 +68,18 @@ export class ScicatDcMapper implements ProviderDCMapper {
                       "https://www.openaire.eu/schema/repo-lit/4.0/openaire.xsd"
                   }
                 },
-                // ......does it matter what these fields are called?
+                // TITRE
                 {
                   "datacite:titles": [{ title: record.title }]
                 },
+                // IDENTIFIANT (URL avec DOI)
                 {
                   "datacite:identifier": [
                     { _attr: { identifierType: "URL" } },
-                    "https://doi.org/"+record._id.toString()
+                    "https://doi.org/" + record._id.toString()
                   ]
                 },
+                // DESCRIPTION
                 {
                   "datacite:descriptions": [
                     {
@@ -75,6 +90,7 @@ export class ScicatDcMapper implements ProviderDCMapper {
                     }
                   ]
                 },
+                // DATES (fixes, codées en dur)
                 {
                   "datacite:dates": [
                     {
@@ -91,7 +107,9 @@ export class ScicatDcMapper implements ProviderDCMapper {
                     }
                   ]
                 },
+                // ANNÉE DE PUBLICATION
                 { "datacite:publicationYear": record.publicationYear },
+                // CRÉATEUR + AFFILIATION
                 {
                   "datacite:creators": [
                     {
@@ -106,8 +124,11 @@ export class ScicatDcMapper implements ProviderDCMapper {
                     }
                   ]
                 },
-                { "datacite:publisher": record.publisher }, //category?/ source?
-                { "datacite:version": 1 }, //category?/ source?
+                // ÉDITEUR
+                { "datacite:publisher": record.publisher },
+                // VERSION (toujours 1)
+                { "datacite:version": 1 },
+                // DROITS (toujours openAccess ici)
                 {
                   "datacite:rightsList": [
                     {
@@ -122,16 +143,20 @@ export class ScicatDcMapper implements ProviderDCMapper {
                     }
                   ]
                 }
-              ] //rights?
-              // .....add more fields here
+              ]
             }
           ]
         }
       ]
     };
-    return item;
+    return item; // retourne le bloc complet pour cet enregistrement
   }
 
+  /**
+   * Génère une réponse ListRecords (liste complète des enregistrements OAI).
+   * @param records - tableau des enregistrements Mongo
+   * @returns {any} - réponse structurée pour l’API OAI
+   */
   public mapOaiDcListRecords(records: any[]): any {
     const list = [];
     const response = {
@@ -139,7 +164,7 @@ export class ScicatDcMapper implements ProviderDCMapper {
     };
 
     for (let record of records) {
-      let item = this.createItemRecord(record);
+      let item = this.createItemRecord(record); // transforme chaque record
       list.push(item);
     }
 
@@ -150,16 +175,26 @@ export class ScicatDcMapper implements ProviderDCMapper {
     return response;
   }
 
+  /**
+   * Génère une réponse GetRecord (récupération d’un enregistrement unique).
+   * @param record - un enregistrement Mongo
+   * @returns {any} - réponse structurée pour l’API OAI
+   */
   public mapOaiDcGetRecord(record: any): any {
     if (!record) {
       throw new Error("Record not found");
     }
 
-    let item = this.createItemRecord(record);
+    let item = this.createItemRecord(record); // transforme le record
     logger.debug("Got item with id " + record._id + ", title: " + record.title);
     return item;
   }
 
+  /**
+   * Génère une réponse ListIdentifiers (récupère seulement les identifiants).
+   * @param records - tableau des enregistrements Mongo
+   * @returns {any} - réponse structurée pour l’API OAI
+   */
   public mapOaiDcListIdentifiers(records: any[]): any {
     const list = [];
     const response = {
@@ -187,6 +222,11 @@ export class ScicatDcMapper implements ProviderDCMapper {
     return response;
   }
 
+  /**
+   * Génère une réponse ListSets (liste des sets disponibles dans le serveur OAI).
+   * @param records - non utilisé ici (codé en dur)
+   * @returns {any} - réponse structurée pour l’API OAI
+   */
   public mapOaiDcListSets(records: any[]): any {
     const response = {
       ListSets: <any>[]
@@ -201,3 +241,5 @@ export class ScicatDcMapper implements ProviderDCMapper {
     return response;
   }
 }
+
+

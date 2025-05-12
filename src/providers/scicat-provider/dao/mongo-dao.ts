@@ -22,14 +22,7 @@ export class MongoConnector {
       process.env.DB_PASS? ":" + process.env.DB_PASS : "" ) + "@" : ""
     const db_url = process.env.DATABASE ? "/" + process.env.DATABASE: "" 
     const url = process.env.DB_URL || (user_url + process.env.DB_HOST + ":" + process.env.DB_PORT + db_url);
-    console.log("🔍 DEBUG ENV:");
-    console.log("DB_USER:", process.env.DB_USER);
-    console.log("DB_PASS:", process.env.DB_PASS);
-    console.log("DB_HOST:", process.env.DB_HOST);
-    console.log("DB_PORT:", process.env.DB_PORT);
-    console.log("DATABASE:", process.env.DATABASE);
-    console.log("DB_URL:", process.env.DB_URL);
-    logger.debug("DB_USER:", process.env.DB_USER);
+
     this.dbName = process.env.DATABASE;
     this.collectionName = process.env.COLLECTION;
 

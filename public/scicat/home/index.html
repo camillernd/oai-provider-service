@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAI Server - Grottocenter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-purple: #3c0d3c;
+            --accent-orange: #f78f1e;
+            --light-cream: #f9f6f2;
+        }
+        body {
+            margin: 0;
+            font-family: 'Raleway', sans-serif;
+            background-color: var(--light-cream);
+            color: #333;
+            line-height: 1.6;
+        }
+        header {
+            background-color: var(--primary-purple);
+            padding: 2rem 1rem;
+            text-align: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+        .container {
+            max-width: 1600px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+        .section {
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            padding: 2rem;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .section-header {
+            color: var(--primary-purple);
+            border-bottom: 3px solid var(--accent-orange);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        ul {
+            padding-left: 1.5rem;
+            margin: 1rem 0;
+        }
+        ul li {
+            margin-bottom: 0.75rem;
+            position: relative;
+        }
+        ul li::before {
+            content: "–";
+            position: absolute;
+            left: -1.25rem;
+            color: var(--accent-orange);
+        }
+        .highlight {
+            background: #fff8f0;
+            padding: 1.5rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+        }
+        .highlight code {
+            font-family: monospace;
+            background: rgba(0,0,0,0.05);
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+        }
+        .links a {
+            color: var(--primary-purple);
+            text-decoration: underline;
+            font-weight: 500;
+        }
+        .links a:hover {
+            color: var(--accent-orange);
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+            header {
+                font-size: 1.75rem;
+                padding: 1.5rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>OAI SERVER - GROTTOCENTER</header>
+    
+    <div class="container">
+        <section class="section">
+            <h2 class="section-header">Share the documentation on Karst</h2>
+            <p>The “Bulletin Bibliographique Spéléologique / Speleo Abstract” has existed for over 50 years and aims to share information on publications related to karst worldwide.</p>
+            <p>For the past 5 years, the BBS has been gradually ported to Grottocenter, and today over 120,000 document analyses are accessible. We invite documentation centers that use library management software to join this project, aimed at organizing the automatic sharing of information using widely available tools.</p>
+            <p>Our goal is to extend this exchange by archiving all documentation on the underground environment with tools that allow automatic integration.</p>
+            <p><strong>The ultimate goal:</strong> To build a network of documentation centers that, together, provide access to all documents in digital form.</p>
+        </section>
+
+        <div class="two-column">
+            <section class="section">
+                <h2 class="section-header">How to Use the Server</h2>
+                <div class="highlight">
+                    <p>Our OAI-PMH server allows external systems to harvest metadata using standardized requests.</p>
+                    
+                    <h3>Available actions:</h3>
+                    <ul>
+                        <li>List all records <code>?verb=ListRecords</code></li>
+                        <li>Identify available collections <code>?verb=ListSets</code></li>
+                        <li>Retrieve Dublin Core metadata <code>?metadataPrefix=oai_dc</code></li>
+                    </ul>
+
+                    <h3>Examples:</h3>
+                    <code>?verb=ListIdentifiers&metadataPrefix=oai_dc&set=grottocenter:books</code><br><br>
+                    <code>?verb=GetRecord&identifier=oai:grottocenter:doc/1234&metadataPrefix=oai_dc</code>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2 class="section-header">The OAI-PMH Protocol</h2>
+                <p>The Open Archives Initiative Protocol for Metadata Harvesting (OAI-PMH) is a global standard for sharing and exchanging metadata.</p>
+                <p>It allows external systems to harvest data from our repository and integrate it into their own catalogs or services.</p>
+                
+                <div class="links">
+                    <h3>Learn more:</h3>
+                    <ul>
+                        <li><a href="https://www.openarchives.org/">Open Archives Initiative</a></li>
+                        <li><a href="https://www.openarchives.org/OAI/openarchivesprotocol.html">OAI-PMH Specifications (V2)</a></li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+    </div>
+</body>
+</html>
