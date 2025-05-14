@@ -27,4 +27,10 @@ import * as dotenv from 'dotenv';
 
 dotenv.config(); 
 
-export const getCollectionID = () => (process.env.COLLECTION_ID || 'doi');
+export function getCollectionID(): string {
+    const value = process.env.COLLECTION_ID;
+    if (!value) {
+      console.trace("⚠️ getCollectionID() called but value is undefined");
+    }
+    return value || 'id';
+  }

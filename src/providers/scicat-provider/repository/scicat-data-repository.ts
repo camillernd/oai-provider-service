@@ -118,9 +118,27 @@ export function factory(options = {}): DataRepository {
      * @returns {Promise<never>}
      */
 
-    getSets: (identifier: string = undefined) => {
-      return Promise.resolve([SETS]);
+    getSets: async () => {
+      try {
+        const distinctSpecs = await dao.getDistinctSetSpecs();
+    
+        return distinctSpecs.map((spec: string) => {
+          const name = spec
+            .replace("grottocenter:", "")
+            .replace("-", " ")
+            .replace(/\b\w/g, c => c.toUpperCase());
+    
+          return {
+            setSpec: spec,
+            setName: name
+          };
+        });
+      } catch (err) {
+        logger.error("Erreur lors de la récupération des sets:", err);
+        return [];
+      }
     },
+    
 
     /**
      * Gets list of identifiers.
@@ -141,5 +159,8 @@ export function factory(options = {}): DataRepository {
     getRecords: (parameters: any) => {
       return dao.recordsQuery(parameters, filter);
     }
+
+
+    
   });
 }

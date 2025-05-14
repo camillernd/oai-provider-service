@@ -466,23 +466,23 @@ export class CoreOaiProvider {
      * @returns {Promise<any>}
      */
     listSets(query: any): Promise<any> {
-        /**
-         * Parameters: resumptionToken (exclusive)
-         * exceptions: badArgument, badResumptionToken, noSetHierarchy
-         */
         return new Promise((resolve: any, reject: any) => {
-            const queryParameters = this.getQueryParameters(query);
-            const exception: ExceptionParams = {
-                baseUrl: this.parameters.baseURL,
-                verb: VERBS.LIST_SETS
-            };
-            /*if (queryParameters.length > 2 || (queryParameters.length === 2 &&
-                    !this.hasKey(query, 'resumptionToken'))) {
-                resolve(generateException(exception, EXCEPTION_CODES.BAD_ARGUMENT));
-            } else {*/
-                const mapped = this.mapper.mapOaiDcListSets(null)
-                resolve(generateResponse(<any>query, this.parameters.baseURL, mapped));
-           /* }*/
+        const queryParameters = this.getQueryParameters(query);
+        const exception: ExceptionParams = {
+            baseUrl: this.parameters.baseURL,
+            verb: VERBS.LIST_SETS
+        };
+    
+        // Appel dynamique au provider → getSets()
+        this.oaiService.getProvider().getSets()
+            .then((sets: any[]) => {
+            const mapped = this.mapper.mapOaiDcListSets(sets);
+            resolve(generateResponse(<any>query, this.parameters.baseURL, mapped));
+            })
+            .catch((err: any) => {
+            logger.error("❌ Failed to get sets:", err);
+            resolve(generateException(exception, EXCEPTION_CODES.NO_SET_HIERARCHY));
+            });
         });
     }
 
