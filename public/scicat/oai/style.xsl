@@ -516,7 +516,7 @@ p.intro {
 <!-- oai setSpec object -->
 
 <xsl:template match="oai:setSpec">
-  <tr><td class="key">setSpec</td>
+  <tr><td class="key">Set identifier</td>
   <td class="value"><xsl:value-of select="."/>
     <xsl:text> </xsl:text><a class="link" href="?verb=ListIdentifiers&amp;metadataPrefix=oai_dc&amp;set={.}">Identifiers</a>
     <xsl:text> </xsl:text><a class="link" href="?verb=ListRecords&amp;metadataPrefix=oai_dc&amp;set={.}">Records</a>
@@ -584,8 +584,23 @@ p.intro {
 <xsl:template match="dc:format" xmlns:dc="http://purl.org/dc/elements/1.1/">
 <tr><td class="key">Format</td><td class="value"><xsl:value-of select="."/></td></tr></xsl:template>
 
-<xsl:template match="dc:identifier" xmlns:dc="http://purl.org/dc/elements/1.1/">
-<tr><td class="key">Resource Identifier</td><td class="value"><xsl:value-of select="."/></td></tr></xsl:template>
+<!-- Modification pour distinguer les doi des url
+ --><xsl:template match="dc:identifier" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <xsl:choose>
+    <xsl:when test="starts-with(., 'doi:')">
+      <tr><td class="key">Resource Identifier (doi)</td>
+      <td class="value"><xsl:value-of select="."/></td></tr>
+    </xsl:when>
+    <xsl:when test="starts-with(., 'http')">
+      <tr><td class="key">Resource Identifier (url)</td>
+      <td class="value"><a href="{.}"><xsl:value-of select="."/></a></td></tr>
+    </xsl:when>
+    <xsl:otherwise>
+      <tr><td class="key">Resource Identifier</td>
+      <td class="value"><xsl:value-of select="."/></td></tr>
+    </xsl:otherwise>
+  </xsl:choose>
+</xsl:template>
 
 <xsl:template match="dc:source" xmlns:dc="http://purl.org/dc/elements/1.1/">
 <tr><td class="key">Source</td><td class="value"><xsl:value-of select="."/></td></tr></xsl:template>
